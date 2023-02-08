@@ -6,7 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -67,6 +71,55 @@ class BoardRepositoryTest {
         Long bno = 1L;
 
         boardRepository.deleteById(bno);
+
+    }
+
+    @Test
+    public void testPaging(){
+
+        PageRequest pageable = PageRequest.of(0, 10, Sort.by("bno").descending());
+
+        Page<Board> result = boardRepository.findAll(pageable);
+
+        log.info("total count: " + result.getTotalElements());
+        log.info("total page: " + result.getTotalPages());
+        log.info("page number: " + result.getNumber());
+        log.info("page size: " + result.getSize());
+
+        List<Board> todoList = result.getContent();
+
+    }
+
+    @Test
+    public void testSearch1(){
+
+        PageRequest pageable = PageRequest.of(1, 10, Sort.by("bno").descending());
+
+        boardRepository.search1(pageable);
+
+    }
+
+    @Test
+    public void testSearchAll(){
+
+        String[] types = {"t", "c", "w"};
+
+        String keyword = "1";
+
+        PageRequest pageable = PageRequest.of(0, 10, Sort.by("bno").descending());
+
+        Page<Board> result = boardRepository.searchAll(types, keyword, pageable);
+
+        log.info(String.valueOf(result.getTotalPages()));
+
+        log.info(String.valueOf(result.getSize()));
+
+        log.info(String.valueOf(result.getNumber()));
+
+        log.info(result.hasPrevious() + ": " + result.hasNext());
+
+        result.getContent().forEach(board -> log.info(String.valueOf(board)));
+
 
     }
 
