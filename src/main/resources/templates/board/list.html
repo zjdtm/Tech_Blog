@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+
+<div layout:fragment="content">
+
+    <div class="input-group rounded w-50 m-auto mb-5">
+        <form action="/board/list" method="get" class="d-flex w-100">
+            <input type="hidden" name="size" th:value="${pageRequestDTO.size}">
+            <select class="form-select w-25" name="type">
+                <option value="">---</option>
+                <option value="t" th:selected="${pageRequestDTO.type == 't'}">제목</option>
+                <option value="c" th:selected="${pageRequestDTO.type == 'c'}">내용</option>
+                <option value="w" th:selected="${pageRequestDTO.type == 'w'}">작성자</option>
+                <option value="tc" th:selected="${pageRequestDTO.type == 'tc'}">제목 내용</option>
+                <option value="tcw" th:selected="${pageRequestDTO.type == 'tcw'}">제목 내용 작성자</option>
+            </select>
+            <input type="search" class="form-control rounded w-100" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+            <button class="input-group-text border-0" id="search-addon">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+
+    <div class="row row-cols-sm-1 row-cols-md-5 g-3">
+        <div class="col" th:each="dto:${responseDTO.dtoList}">
+          <div class="card h-100 ">
+    <!--        <img src="..." class="card-img-top" alt="...">-->
+            <div class="card-body">
+              <h5 class="card-title">[[${dto.title}]]</h5>
+              <p class="card-text">[[${dto.content}]]</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted">[[${#temporals.format(dto.regDate, 'yyyy MM월 dd일')}]]</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="mt-5">
+      <ul class="pagination flex-wrap justify-content-center">
+          <li class="page-item" th:if="${responseDTO.prev}">
+              <a class="page-link" th:data-num="${responseDTO.start - 1}">Previous</a>
+          </li>
+
+          <th:block th:each="i : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+              <li th:class="${responseDTO.page == i}? 'page-item active' : 'page-item'">
+                  <a class="page-link" th:data-num="${i}">[[${i}]]</a>
+              </li>
+          </th:block>
+
+          <li class="page-item" th:if="${responseDTO.next}">
+              <a class="page-link" th:data-num="${responseDTO.end + 1}">Next</a>
+          </li>
+      </ul>
+    </div>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+    document.querySelector(".pagination").addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const target = e.target;
+
+        if(target.tagName !== 'A'){
+            return
+        }
+
+        const num = target.getAttribute("data-num")
+
+        const formObj = document.querySelector("form")
+
+        formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`
+
+        formObj.submit();
+    },false)
+</script>
